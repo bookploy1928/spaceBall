@@ -1,0 +1,158 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>SpaceBall</title>
+    <script type="text/javascript"
+            src = "simpleGame.js"></script>
+    <script type="text/javascript">
+    
+    var game;
+    var tankGreen;
+    var tankRed;
+    var lamp
+    
+    var background;
+    
+    function Ball(owner){
+        
+        tBall = new Sprite(game, "ball.png", 25, 25);
+        
+        tBall.owner = owner;
+        tBall.hide();
+        tBall.setBoundAction(DIE);
+        
+        tBall.fire = function(){
+            this.setPosition(this.owner.x, this.owner.y);
+            this.setMoveAngle(this.owner.turret.getImgAngle());
+            this.setSpeed(20);
+            this.show();
+        } 
+        tBall.hit = function(){
+            this.setPosition(this.owner.x, this.owner.y);
+            this.show();
+        } 
+        
+        tBall.checkGravity = function(){
+            this.addVector(180, 1);
+        } 
+        
+        return tBall;
+    } 
+    
+    function UserTank(){
+        tTank = new Sprite(game, "c2.png", 100, 70);
+        tTank.setSpeed(0);
+        tTank.setPosition(100, 550);
+        
+        tTank.turret = new Sprite(game, "p1.png", 100,100);
+        tTank.ball = new Ball(tTank);
+        
+        tTank.checkKeys = function(){
+            if (keysDown[K_A]){
+                this.changeXby(-2);
+            }
+            
+            if (keysDown[K_D]){
+                this.changeXby(2);
+            }
+            
+            //always move turret with me.
+            this.turret.setPosition(this.x, this.y);
+            
+            //rotate turret
+            
+            if (keysDown[K_W]){
+                this.turret.changeImgAngleBy(-5);
+                if (this.turret.getImgAngle() < 0){
+                    this.turret.setImgAngle(0);
+                } // end if
+            }
+            
+            if (keysDown[K_S]){
+                this.turret.changeImgAngleBy(5);
+                if (this.turret.getImgAngle() > 90){
+                    this.turret.setImgAngle(90);
+                }
+            }
+            
+            if (keysDown[K_SPACE]){
+                this.ball.fire();
+            }
+            
+            this.turret.update();
+            this.ball.checkGravity();
+            this.ball.update();
+            
+        } // end checkKeys
+                
+        return tTank;
+    } // end tank
+    
+    function DroneTank(){
+        tTank = new Sprite(game, "c1.png", 60, 50);
+        
+        tTank.setPosition(450, 550);
+        
+        tTank.moveRandom = function(){
+            this.setSpeed(0);
+        } // end moveRandom
+        
+        tTank.reset = function(){
+            halfWidth = game.width / 2;
+            x = (Math.random() * halfWidth) + halfWidth;
+            this.setPosition(x, 550);
+        } // end reset
+        
+        return tTank;
+    
+    } // end DroneTank
+
+    function Lamp(){
+        tLamp = new Sprite(game, "s1.png", 60, 120);
+        tLamp.setPosition(400, 530);
+        tLamp.setSpeed(0);
+        return tLamp;
+    
+    } // end DroneTank
+    
+    function checkHit(){
+        if (tankGreen.ball.collidesWith(tankRed)){
+            tankRed.reset();
+        } 
+        if (tankGreen.ball.collidesWith(lamp)){
+          this.ball.hit();
+        }// end if
+    } // end checkHit
+    
+    function init(){
+        game = new Scene();
+        game.setSize(800, 600);
+        tankGreen = new UserTank();
+        tankRed = new DroneTank();
+        lamp = new Lamp()
+        
+        background = new Sprite(game, "splash.png", 800, 600);
+        background.setSpeed(0);
+        background.setPosition(400, 300);
+        game.start();
+    } // end init
+    
+    function update(){
+      game.clear();
+      
+      background.update();
+      tankGreen.checkKeys();
+      tankRed.moveRandom();
+      
+      checkHit();
+      
+      tankGreen.update();
+      tankRed.update();
+      lamp.update();
+    } // end update
+    </script>
+</head>
+<body onload = "init()">
+</body>
+</html>
